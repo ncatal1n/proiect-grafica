@@ -1,0 +1,24 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;400;900&display=swap');
+
+
+html, body{
+    background: #222831;
+    font-family: 'Roboto', sans-serif;
+}
+h1{
+    color:#FD7014;
+}
+canvas{
+    border-radius: 15px;
+    width: 800px;
+    height: 600px;
+
+}
+.main_wrapper{
+    display: flex;
+    place-content: center;
+    flex-direction: column;
+    place-items: center;
+    
+    
+}
