@@ -1,7 +1,7 @@
 
 import WebGlUtils from './webglutils.js';
 import Ball from './Ball.js';
-import Paddle from './Paddle.js';
+import {Paddle, AIPaddle} from './Paddle.js';
 import Counter from './Counter.js';
 
 class GameManager{
@@ -19,13 +19,13 @@ class GameManager{
           "mode" : "stopped",
         };
 
-        this.paddleHeight = 20;
+        this.paddleHeight = 40;
         this.paddleWidth = 200;
         this.paddleComputerWidth = 100;
 
         this.ballSize = 20;
 
-        this.ballSpeed = 1;
+        this.ballSpeed = 0.6;
         this.paddleSpeed = 1;
         
 
@@ -39,12 +39,13 @@ class GameManager{
           this.ballSpeed
         );
 
-        this.computer = new Paddle(
+        this.computer = new AIPaddle(
             (this.width - this.paddleWidth) / 2,
             0,
             this.paddleComputerWidth,
             this.paddleHeight,
-            this.paddleSpeed
+            this.paddleSpeed,
+            0.05
         );
 
         this.player = new Paddle(
@@ -66,13 +67,55 @@ class GameManager{
 
 
     collision(rectA, rectB) {
-        return (
-          rectA.x < rectB.x + rectB.width &&
-          rectA.x + rectA.width > rectB.x &&
-          rectA.y < rectB.y + rectB.height &&
-          rectA.y + rectA.height > rectB.y
-        );
+      const prevRectA = {
+        x: rectA.x - rectA.velocity.x,
+        y: rectA.y - rectA.velocity.y,
+        width: rectA.width,
+        height: rectA.height,
+      };
+    
+      const prevRectB = {
+        x: rectB.x - rectB.velocity.x,
+        y: rectB.y - rectB.velocity.y,
+        width: rectB.width,
+        height: rectB.height,
+      };
+    
+      const isCollidingCurrent = (
+        rectA.x < rectB.x + rectB.width &&
+        rectA.x + rectA.width > rectB.x &&
+        rectA.y < rectB.y + rectB.height &&
+        rectA.y + rectA.height > rectB.y
+      );
+    
+      const isCollidingPrevious = (
+        prevRectA.x < prevRectB.x + prevRectB.width &&
+        prevRectA.x + prevRectA.width > prevRectB.x &&
+        prevRectA.y < prevRectB.y + prevRectB.height &&
+        prevRectA.y + prevRectA.height > prevRectB.y
+      );
+    
+      if (isCollidingCurrent || isCollidingPrevious) {
+        // Handle collision response to prevent objects from getting stuck
+        const overlapX = Math.min(rectA.x + rectA.width, rectB.x + rectB.width) - Math.max(rectA.x, rectB.x);
+        const overlapY = Math.min(rectA.y + rectA.height, rectB.y + rectB.height) - Math.max(rectA.y, rectB.y);
+    
+        if (overlapX < overlapY) {
+          // Adjust x-position
+          const direction = rectA.x < rectB.x ? -1 : 1;
+          rectA.x += overlapX * direction;
+        } else {
+          // Adjust y-position
+          const direction = rectA.y < rectB.y ? -1 : 1;
+          rectA.y += overlapY * direction;
+        }
+        
+        return true; // Collision handled
+      }
+    
+      return false; // No collision
     }
+    
 
 
     drawCompPaddle()
@@ -115,30 +158,14 @@ class GameManager{
         this.utils.drawCircle('#ffffff', this.ball.x, this.ball.y, this.ballSize,30);
     }
 
-    updateComputerPaddle() {
- 
-      let x;
-      let vx = Math.abs(this.ball.velocity.x) - 0.75;
 
-      if(this.ball.x < this.computer.x + this.computer.width /2)
-      {
-        x = this.computer.x - vx;
-      }
-      else{
-        x = this.computer.x + vx;
-      }  
-      if(10 < x && x < this.width - this.computer.width - 10){
-        this.computer.x = x;
-      }
-    }
 
     increaseDifficulty()
     {
       let factor = 5;
       this.player.width -= factor;
       this.computer.width += factor;
-      this.ball.speed += 0.005;
-
+      this.computer.reactionSpeed = (this.computer.reactionSpeed) < 1.5 ? (this.computer.reactionSpeed+ (factor / 1000)) : this.computer.reactionSpeed;
       if(this.player.width <= 10)
       {
         this.state.mode = "gameover";
@@ -154,10 +181,10 @@ class GameManager{
         this.utils.clear(this.width, this.height);
 
         this.player.updatePosition(this.width);
+        this.computer.updatePosition(this.width);
 
         this.drawPaddle();
         this.drawCompPaddle();
-        this.updateComputerPaddle();
         this.drawScore();
 
         this.drawBall();
@@ -177,10 +204,13 @@ class GameManager{
         }
     
         if (this.collision(this.ball, this.player)) {
+          this.ball.speed = 1.5;
           this.ball.velocity.y = -this.ball.velocity.y; 
         }
     
         if (this.collision(this.ball, this.computer)) {
+          this.ball.speed = 1.1;
+
           this.ball.velocity.y = -this.ball.velocity.y; 
         }
     
@@ -191,29 +221,32 @@ class GameManager{
           this.score.player++;
           this.resetGame();
         }
+
+        this.computer.updateComputerPaddle(this.ball.x, this.width);
       }
     
       resetGame() {
 
-        let ballSpeed = this.ball.speed
         let paddleWidth = this.player.width;
         let compPaddleWidth = this.computer.width;
+        let aiRactionSpeed = this.computer.reactionSpeed;
 
         this.ball = new Ball(
           (this.width - this.ballSize + (Math.ceil(Math.random(10, 100)))) / 2,
           (this.height - this.ballSize) / 2,
           this.ballSize,
-          5,
-          5,
-          ballSpeed
+          (Math.round(Math.random(0, 1)) == 0 ? 5 : -5),
+          (Math.round(Math.random(0, 1)) == 0 ? 5 : -5),
+          0.6
         );
   
-        this.computer = new Paddle(
+        this.computer = new AIPaddle(
             (this.width - compPaddleWidth) / 2,
             0,
             compPaddleWidth,
             this.paddleHeight,
-            this.paddleSpeed
+            this.paddleSpeed,
+            aiRactionSpeed
         );
   
         this.player = new Paddle(
@@ -263,12 +296,13 @@ class GameManager{
         this.ballSpeed
       );
 
-      this.computer = new Paddle(
+      this.computer = new AIPaddle(
           (this.width - this.paddleWidth) / 2,
           0,
           this.paddleComputerWidth,
           this.paddleHeight,
-          this.paddleSpeed
+          this.paddleSpeed,
+          0.05
       );
 
       this.player = new Paddle(
