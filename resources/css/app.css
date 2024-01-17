@@ -2,14 +2,17 @@
 
 
 html, body{
-    background: #222831;
+    background: #0c0c0c;
     font-family: 'Roboto', sans-serif;
+    color:rgb(228, 222, 222);
 }
 h1{
-    color:#FD7014;
+    font-weight:lighter;
+    letter-spacing: 6.5px;
+    text-transform: uppercase;
 }
 canvas{
-    border-radius: 15px;
+    border-radius: 6px;
     width: 800px;
     height: 600px;
 
@@ -19,6 +22,5 @@ canvas{
     place-content: center;
     flex-direction: column;
     place-items: center;
-    
     
 }

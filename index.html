@@ -4,16 +4,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ping Pong Game</title>
+    <title>Pong Game</title>
     <link rel="stylesheet" href="resources/css/app.css">
 </head>
 
 <body>
-    <div class="main_wrapper">
-        <h1>Ping-Pong Game</h1>
-        <p style="color:white; width: 500px;">Un joc classic de ping-pong realizat folosing WebGL (Web Graphics Library), libraria nativa JavaScript pentru redarea graficelor interactive 3D și 2D cu performanțe ridicate în orice browser web compatibil, fără a utiliza plugin-uri. <br><b></b>WebGL</b> realizează acest lucru introducând un API care se conformează strâns cu OpenGL ES 2.0 și care poate fi utilizat în elementele HTML canvas.</p>
+    <div id="main_wrapper" class="main_wrapper">
+        <h1>Pong Game</h1>
+        <p style="width: 50vw; font-weight: lighter;">Un joc classic de Pong realizat folosing WebGL (Web Graphics Library), libraria nativa JavaScript pentru redarea graficelor interactive 3D și 2D cu performanțe ridicate în orice browser web compatibil, fără a utiliza plugin-uri. <br><b></b>WebGL</b> realizează acest lucru introducând un API care se conformează strâns cu OpenGL ES 2.0 și care poate fi utilizat în elementele HTML canvas.</p>
         <canvas width="800" height="600"></canvas>
+        <div style="width: 50vw;text-align: left;">
+            <h3>Controale</h3>
+            <p style="width: 50vw; font-weight: lighter;">
+                <ol style="width: 50vw; font-weight: lighter;">
+                    <li>Tasta sageata stanga: miscare la stanga</li>
+                    <li>Tasta sageata dreapta: miscare la dreapta</li>
+                    <li>Tasta ENTER: start/pause joc</li>
+                    <li>Tasta 'R': restart joc</li>
+                </ol>
+            </p>
+        </div>
     </div>
+
     <script type="module" defer src="resources/js/main.js"></script>
 </body>
 
